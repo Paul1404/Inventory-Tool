@@ -1,9 +1,45 @@
-# Add necessary .NET assembly
-Add-Type -AssemblyName System.Windows.Forms
+<#
+.SYNOPSIS
+A function to create a new button.
 
-# Define the file path
-$filePath = ".\inventory.json"
+.DESCRIPTION
+This function creates a new System.Windows.Forms.Button object with the provided properties and returns it.
 
+.PARAMETER text
+The text to display on the button.
+
+.PARAMETER onClick
+The scriptblock to execute when the button is clicked.
+
+.EXAMPLE
+$button = New-Button "Click Me!" { Write-Host "Button Clicked!" }
+#>
+function New-Button {
+    param([string]$text, [scriptblock]$onClick)
+
+    return New-Object System.Windows.Forms.Button -Property @{
+        Text = $text
+        Dock = $settings.Button.Dock
+        BackColor = $settings.Button.BackColor
+        ForeColor = $settings.Button.ForeColor
+        Font = New-Object System.Drawing.Font($settings.Button.Font, $settings.Button.FontSize)  # Set the font and size
+        Add_Click = $onClick
+    }
+}
+
+<#
+.SYNOPSIS
+A function to convert a PSCustomObject to a Hashtable.
+
+.DESCRIPTION
+This function iterates over the properties of a PSCustomObject and adds them to a new Hashtable. The Hashtable is then returned.
+
+.PARAMETER InputObject
+The PSCustomObject to convert to a Hashtable.
+
+.EXAMPLE
+$hash = ConvertTo-Hashtable $customObject
+#>
 function ConvertTo-Hashtable {
     param($InputObject)
 
@@ -16,22 +52,16 @@ function ConvertTo-Hashtable {
     return $hashTable
 }
 
+<#
+.SYNOPSIS
+A function to load and display data from a JSON file in a DataGridView.
 
-# Load settings from JSON file
-$settings = Get-Content -Path '.\settings.json' | ConvertFrom-Json
+.DESCRIPTION
+This function clears the existing data from the DataTable, loads new data from the specified JSON file, adds the data to the DataTable, and sets the DataSource of the DataGridView to the DataTable.
 
-# Create a DataTable
-$dataTable = New-Object System.Data.DataTable
-
-# Define columns
-$dataTable.Columns.Add("TimeStamp")
-$dataTable.Columns.Add('ComputerName')
-$dataTable.Columns.Add('CPU')
-$dataTable.Columns.Add('TotalRAM')
-$dataTable.Columns.Add('Motherboard')
-$dataTable.Columns.Add('Drive')
-
-# Function to load and display data
+.EXAMPLE
+Get-Data
+#>
 function Get-Data {
     # Clear existing data
     $dataTable.Clear()
@@ -56,22 +86,29 @@ function Get-Data {
     $dataGridView.DataSource = $dataTable
 }
 
+
+# Add necessary .NET assembly
+Add-Type -AssemblyName System.Windows.Forms
+
+# Define the file path
+$filePath = ".\inventory.json"
+
+# Load settings from JSON file
+$settings = Get-Content -Path '.\settings.json' | ConvertFrom-Json
+
+# Create a DataTable
+$dataTable = New-Object System.Data.DataTable
+
+# Define columns
+$dataTable.Columns.Add("TimeStamp")
+$dataTable.Columns.Add('ComputerName')
+$dataTable.Columns.Add('CPU')
+$dataTable.Columns.Add('TotalRAM')
+$dataTable.Columns.Add('Motherboard')
+$dataTable.Columns.Add('Drive')
+
 # Create a DataGridView and add data
 $dataGridView = New-Object System.Windows.Forms.DataGridView -Property (ConvertTo-Hashtable $settings.DataGridView)
-
-# Function to create a button
-function New-Button {
-    param([string]$text, [scriptblock]$onClick)
-
-    return New-Object System.Windows.Forms.Button -Property @{
-        Text = $text
-        Dock = $settings.Button.Dock
-        BackColor = $settings.Button.BackColor
-        ForeColor = $settings.Button.ForeColor
-        Font = New-Object System.Drawing.Font($settings.Button.Font, $settings.Button.FontSize)  # Set the font and size
-        Add_Click = $onClick
-    }
-}
 
 # Create buttons
 $clearButton = New-Button 'Clear Inventory' {
@@ -97,14 +134,14 @@ $closeButton = New-Button 'Close Application' {
 # Create a panel and add buttons
 $buttonPanel = New-Object System.Windows.Forms.TableLayoutPanel
 $buttonPanel.RowCount = 1
-$buttonPanel.ColumnCount = 3  # Increase column count to 3
+$buttonPanel.ColumnCount = 3
 $buttonPanel.Dock = 'Bottom'
 $buttonPanel.Controls.Add($clearButton, 0, 0)
 $buttonPanel.Controls.Add($refreshButton, 1, 0)
-$buttonPanel.Controls.Add($closeButton, 2, 0)  # Add close button in the third column
-$buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 33.33)))  # Set width to 33.33%
-$buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 33.33)))  # Set width to 33.33%
-$buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 33.33)))  # Add a new ColumnStyle for the third column
+$buttonPanel.Controls.Add($closeButton, 2, 0)
+$buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 33.33)))
+$buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 33.33)))
+$buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 33.33)))
 
 # Create a form and add DataGridView and button panel
 $form = New-Object System.Windows.Forms.Form -Property @{
