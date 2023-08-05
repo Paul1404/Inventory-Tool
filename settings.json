@@ -1,0 +1,28 @@
+{
+    "DataGridView": {
+        "AutoSizeColumnsMode": "AllCells",
+        "Dock": "Fill",
+        "BackgroundColor": "White",
+        "GridColor": "LightGray",
+        "ColumnHeadersDefaultCellStyle": {
+            "BackColor": "Navy",
+            "ForeColor": "White"
+        },
+        "DefaultCellStyle": {
+            "BackColor": "WhiteSmoke",
+            "ForeColor": "Black"
+        },
+        "AlternatingRowsDefaultCellStyle": {
+            "BackColor": "Lavender",
+            "ForeColor": "Black"
+        },
+        "RowHeadersVisible": false
+    },
+    "Button": {
+        "Dock": "Fill",
+        "BackColor": "Navy",
+        "ForeColor": "White",
+        "Font": "Arial",
+        "FontSize": 15
+    }
+}
