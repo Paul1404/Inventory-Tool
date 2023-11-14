@@ -176,6 +176,66 @@ function Get-DriveInfo {
 }
 
 
+function Get-BasicWindowsVersion {
+    Write-Info "Fetching basic Windows version information:"
+    Write-InlineProgress -Task {
+        try {
+            (Get-CimInstance -ClassName Win32_OperatingSystem).Caption
+        } catch {
+            Write-Error "Failed to fetch basic Windows version: $_"
+        }
+    }
+}
+
+
+function Get-WindowsUpdateVersion {
+    Write-Info "Fetching Windows update version information:"
+    Write-InlineProgress -Task {
+        try {
+            $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
+            $version = $osInfo.Version
+            $releaseId = $osInfo.ReleaseId
+
+            if ($releaseId) {
+                return $releaseId  # Prefer ReleaseId if available (common in Windows 10)
+            } elseif ($version) {
+                return $version    # Use Version if ReleaseId is not available (common in Windows 11)
+            } else {
+                return "Unknown"
+            }
+        } catch {
+            Write-Error "Failed to fetch Windows update version: $_"
+        }
+    }
+}
+
+
+
+function Get-IPAddress {
+    Write-Info "Fetching IP address:"
+    Write-InlineProgress -Task {
+        try {
+            $networkInfo = Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object { $null -ne $_.IPAddress }
+            return $networkInfo.IPAddress[0]
+        } catch {
+            Write-Error "Failed to fetch IP address: $_"
+        }
+    }
+}
+
+function Get-MACAddress {
+    Write-Info "Fetching MAC address:"
+    Write-InlineProgress -Task {
+        try {
+            $networkInfo = Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object { $null -ne $_.IPAddress }
+            return $networkInfo.MACAddress
+        } catch {
+            Write-Error "Failed to fetch MAC address: $_"
+        }
+    }
+}
+
+
 <#
 .SYNOPSIS
 Updates or creates an inventory file in either JSON or CSV format.
@@ -287,6 +347,10 @@ try {
     $TotalRAM = Get-RAMInfo
     $Motherboard = Get-MotherboardInfo
     $Drive = Get-DriveInfo
+    $BasicWindowsVersion = Get-BasicWindowsVersion
+    $WindowsUpdateVersion = Get-WindowsUpdateVersion
+    $IPAddress = Get-IPAddress
+    $MACAddress = Get-MACAddress
 } catch {
     Write-Error "Failed to fetch system information: $_"
     return
@@ -302,6 +366,10 @@ $output = [ordered]@{
     'TotalRAM' = $TotalRAM
     'Motherboard' = $Motherboard.Product
     'Drive' = $Drive
+    'BasicWindowsVersion' = $BasicWindowsVersion
+    'WindowsUpdateVersion' = $WindowsUpdateVersion
+    'IPAddress' = $IPAddress
+    'MACAddress' = $MACAddress
 }
 
 # Convert the hashtable to a PSObject

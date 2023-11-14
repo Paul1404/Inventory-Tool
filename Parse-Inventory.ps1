@@ -78,13 +78,18 @@ function Get-Data {
             $row['CPU'] = $item.CPU
             $row['TotalRAM'] = $item.TotalRAM
             $row['Motherboard'] = $item.Motherboard
-            $row['Drive'] = $item.Drive.Trim('"')  # Trim the double quotes from the Drive property
+            $row['Drive'] = $item.Drive.Trim('"')
+            $row['BasicWindowsVersion'] = $item.BasicWindowsVersion
+            $row['WindowsUpdateVersion'] = $item.WindowsUpdateVersion
+            $row['IPAddress'] = $item.IPAddress
+            $row['MACAddress'] = $item.MACAddress
             $dataTable.Rows.Add($row)
         }
     }
 
     $dataGridView.DataSource = $dataTable
 }
+
 
 
 # Add necessary .NET assembly
@@ -100,15 +105,22 @@ $settings = Get-Content -Path '.\settings.json' | ConvertFrom-Json
 $dataTable = New-Object System.Data.DataTable
 
 # Define columns
-$dataTable.Columns.Add("TimeStamp")
+$dataTable.Columns.Add("Timestamp")
 $dataTable.Columns.Add('ComputerName')
 $dataTable.Columns.Add('CPU')
 $dataTable.Columns.Add('TotalRAM')
 $dataTable.Columns.Add('Motherboard')
 $dataTable.Columns.Add('Drive')
+$dataTable.Columns.Add('BasicWindowsVersion')
+$dataTable.Columns.Add('WindowsUpdateVersion')
+$dataTable.Columns.Add('IPAddress')
+$dataTable.Columns.Add('MACAddress')
+
 
 # Create a DataGridView and add data
 $dataGridView = New-Object System.Windows.Forms.DataGridView -Property (ConvertTo-Hashtable $settings.DataGridView)
+# Set AutoSizeColumnsMode to Fill for the DataGridView
+$dataGridView.AutoSizeColumnsMode = [System.Windows.Forms.DataGridViewAutoSizeColumnsMode]::Fill
 
 # Create buttons
 $clearButton = New-Button 'Clear Inventory' {
@@ -145,8 +157,18 @@ $buttonPanel.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([Syst
 
 # Create a form and add DataGridView and button panel
 $form = New-Object System.Windows.Forms.Form -Property @{
-    Size = New-Object System.Drawing.Size(1000, 1000)
+    Size = New-Object System.Drawing.Size(1500, 1000)
+    Text = "Inventory-Tool"  # Set the title of the form
 }
+
+# Set the form icon
+$iconPath = Join-Path -Path $PSScriptRoot -ChildPath 'icon.ico'
+if (Test-Path $iconPath) {
+    $form.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($iconPath)
+} else {
+    Write-Warning "Icon file not found at path: $iconPath"
+}
+
 $form.Controls.Add($dataGridView)
 $form.Controls.Add($buttonPanel)
 
